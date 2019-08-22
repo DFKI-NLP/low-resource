@@ -1,0 +1,2 @@
+{"label": "UNIT_OF_ENERGY", "pattern": [{"IS_DIGIT": true}, {"LOWER": {"REGEX": "^k?w\/?h$"}}]}
+{"label": "UNIT_OF_MASS", "pattern": [{"IS_DIGIT": true}, {"LOWER": {"REGEX": "^k?g$"}}]}
