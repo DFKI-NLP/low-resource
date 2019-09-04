@@ -1,6 +1,8 @@
 # project dependencies
 spacy
 tqdm
+allennlp
+
 
 # spacy model
-en_core_web_lg
+python -m spacy download en_core_web_lg
