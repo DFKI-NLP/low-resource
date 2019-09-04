@@ -95,6 +95,6 @@
     "grad_clipping": 5.0,
     "num_epochs": 20,
     "patience": 5,
-    "cuda_device": -1
+    "cuda_device": 0
   }
 }
