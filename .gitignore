@@ -54,3 +54,4 @@ Dockerfile~
 
 # Jupyter
 .ipynb_checkpoints
+/checkpoints/
