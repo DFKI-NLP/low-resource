@@ -62,6 +62,6 @@ def create_train_dev_split(path, train, dev, proportion_train=0.8):
 
 
 if __name__ == '__main__':
-    #path_out = convert_json_to_jsonl('../../data/distantly_labeled/amazon_wdc_washer_distant.json')
-    path_out = convert_json_to_jsonl('../../data/distantly_labeled/lenovo_distant.json')
+    path_out = convert_json_to_jsonl('../../data/distantly_labeled/amazon_wdc_washer_distant.json')
+    #path_out = convert_json_to_jsonl('../../data/distantly_labeled/lenovo_distant.json')
     create_train_dev_split(path_out, '../../data/train_distant.jsonl', '../../data/dev_distant.jsonl')
