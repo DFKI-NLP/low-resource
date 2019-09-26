@@ -56,4 +56,33 @@ def create_train_dev_split(path_in, path_out_train, path_out_dev):
     print("per dev doc has: "+str(dev_B / dev_count))
 
 
+def create_train_dev_split_arne(path_in, path_out_train, path_out_dev):
+    train_count = 0
+    dev_count = 0
+    with open(path_in) as f, open(path_out_train, 'w') as out_f_train, open(path_out_dev, 'w') as out_f_dev:
+        for line in f.readlines():
+            json_data = json.loads(line)
+            tokens = json_data['token']
+            ners = json_data['ner']
+
+            # get all tokens tagged as component
+            # normalize to lower
+            tokens_component = [tokens[i].lower() for i, ner in enumerate(ners) if ner in ['B-COMPONENTS', 'I-COMPONENTS']]
+            # test if any token in our selected dev component tokens is still there
+            tags_set_found = any([t.lower() in tokens_component for t in tags_set])
+            if tags_set_found:
+                out_f_dev.write(line)
+                dev_count += 1
+            else:
+                out_f_train.write(line)
+                train_count += 1
+    print(train_count)
+    print(dev_count)
+
+
 create_train_dev_split(path_in="../../src/data/amazon_distant_bio.jsonl",path_out_train="../../src/data/distantly_labeled/train_appear.jsonl",path_out_dev="../../src/data/distantly_labeled/dev_appear.jsonl")
+
+#if __name__ == '__main__':
+#    create_train_dev_split_arne(path_in="data/distantly_labeled/amazon_distant_bio.jsonl",
+#                           path_out_train="data/distantly_labeled/train_appear.jsonl",
+#                           path_out_dev="data/distantly_labeled/dev_appear.jsonl")
