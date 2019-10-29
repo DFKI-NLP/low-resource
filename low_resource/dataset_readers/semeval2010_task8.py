@@ -47,14 +47,19 @@ class SemEval2010Task8DatasetReader(DatasetReader):
         self,
         max_len: int,
         lazy: bool = False,
+        pretokenized: bool = True,
+        text_field: str = "tokens",
+        span_end_exclusive: bool = False,
         tokenizer: Tokenizer = None,
         token_indexers: Dict[str, TokenIndexer] = None,
     ) -> None:
         super().__init__(lazy)
         self._max_len = max_len
+        self._pretokenized = pretokenized
+        self._text_field = text_field
+        self._span_end_exclusive = span_end_exclusive
         self._tokenizer = tokenizer or WordTokenizer(
-            word_splitter=JustSpacesWordSplitter()
-        )
+            word_splitter=JustSpacesWordSplitter())
         self._token_indexers = token_indexers or {"tokens": SingleIdTokenIndexer()}
 
     @overrides
@@ -70,7 +75,10 @@ class SemEval2010Task8DatasetReader(DatasetReader):
             for line in data_file:
                 example = json.loads(line)
 
-                text = " ".join(example["tokens"])
+                text = example[self._text_field]
+                if self._pretokenized:
+                    text = " ".join(text)
+
                 relation = example["label"]
 
                 entity1, entity2 = example["entities"]
@@ -99,8 +107,9 @@ class SemEval2010Task8DatasetReader(DatasetReader):
         head_start, head_end = head
         tail_start, tail_end = tail
 
-        head_end = head_end - 1
-        tail_end = tail_end - 1
+        if self._span_end_exclusive:
+            head_end = head_end - 1
+            tail_end = tail_end - 1
 
         head_start = min(head_start, self._max_len - 1)
         head_end = min(head_end, self._max_len - 1)

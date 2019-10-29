@@ -7,14 +7,25 @@
   local encoding_dropout = 0.5,
 
   local num_filters = 150,
+  local ngram_filter_sizes = [2, 3, 4, 5],
+  local padding_length = 5,
+
+  local text_encoder_input_dim = token_emb_dim + 2 * offset_emb_dim,
+  local classifier_feedforward_input_dim = num_filters * std.length(ngram_filter_sizes),
+
+  local num_classes = 2,
 
   "dataset_reader": {
     "type": "semeval_2010_task_8",
     "max_len": 100,
+    "pretokenized": false,
+    "text_field": "sent",
+    "span_end_exclusive": false,
     "token_indexers": {
       "tokens": {
         "type": "single_id",
-        "lowercase_tokens": true
+        "lowercase_tokens": true,
+        "token_min_padding_length": padding_length,
       }
     }
   },
@@ -38,9 +49,9 @@
         0
       ],
       "hidden_dims": [
-        19
+        num_classes
       ],
-      "input_dim": 600,
+      "input_dim": classifier_feedforward_input_dim,
       "num_layers": 1
     },
     "embedding_dropout": emb_dropout,
@@ -67,13 +78,8 @@
     ],
     "text_encoder": {
       "type": "cnn",
-      "embedding_dim": 400,
-      "ngram_filter_sizes": [
-        2,
-        3,
-        4,
-        5
-      ],
+      "embedding_dim": text_encoder_input_dim,
+      "ngram_filter_sizes": ngram_filter_sizes,
       "num_filters": num_filters
     },
     "text_field_embedder": {
@@ -86,8 +92,9 @@
     },
     "verbose_metrics": false,
   },
-  "train_data_path": "data/semeval_2010_task_8/train.jsonl",
-  "validation_data_path": "data/semeval_2010_task_8/dev.jsonl",
+  "train_data_path": "data/relation_annotation_train.csv",
+  // "train_data_path": "data/semeval_2010_task_8/train.jsonl",
+  // "validation_data_path": "data/semeval_2010_task_8/dev.jsonl",
   "trainer": {
     "cuda_device": 0,
     "num_epochs": 50,
