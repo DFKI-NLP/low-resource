@@ -1,11 +1,13 @@
 Battery
 Screen
 hard drive
+flash drive
 RAM
 DVD-ROM drive
 CD-RW drive
 DVD-ROM
 CD-RW
+wifi
 Bluetooth
 BasicsHard Drive
 BasicsHard
@@ -28,7 +30,7 @@ DVD
 CD/DVD
 Keyboard
 Mouse
-touchpad
+mouse pad
 DDR SDRAM
 video/graphics card
 display
@@ -55,11 +57,15 @@ AC adapter
 hard disk
 Multimedia
 Ethernet interface
-IEEE 1394 port
 wireless LAN
-CompactFlash
-desktop
-laptop
+Compact Flash
 CD-ROM
 PCI slot
 AMD
+storage
+battery Adapter
+microSD
+memory card reader
+HDD
+LED connector
+DDR SDRAM

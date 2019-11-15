@@ -12,7 +12,7 @@ def pre_defined_patterns():
 
     weights_pattern = [
         {"LIKE_NUM": True},
-        {"LOWER": {"IN": ["g", "kg", "grams", "kilograms", "lb", "lbs", "pounds"]}}
+        {"LOWER": {"IN": ["g", "kg", "grams", "kilograms", "lb", "lbs", "pounds", "-pound"]}}
     ]
 
     dimension_pattern = [
@@ -21,28 +21,31 @@ def pre_defined_patterns():
         {"LIKE_NUM": True},
         {"LOWER": "x"},
         {"LIKE_NUM": True}
-
     ]
 
-    speed_pattern = [{"LIKE_NUM": True}, {"LOWER": {"IN": ["mhz", "ghz"]}}]
+    speed_pattern = [{"LIKE_NUM": True}, {"ORTH": {"IN": ["MHz", "GHz"]}}]
 
-    write_speed_pattern = [{"LIKE_NUM": True}, {"LOWER": "Kilobytes"},{"LOWER": "per"},{"LOWER": {"IN": ["second", "second*"]}}]
+    write_speed_pattern = [{"LIKE_NUM": True}, {"LOWER": "Kilobytes"}, {"LOWER": "per"},
+                           {"LOWER": {"IN": ["second", "second*"]}}]
 
-    inches_pattern = [{"LIKE_NUM": True}, {"LOWER": {"IN": ["by", "x"]}}, {"LIKE_NUM": True}, {"LOWER": {"IN": ["inches", "maximum"]}}]
+    inches_pattern = [{"LIKE_NUM": True}, {"LOWER": {"IN": ["by", "x"]}}, {"LIKE_NUM": True},
+                      {"LOWER": {"IN": ["inches", "maximum"]}}]
 
+    size_pattern = [{"LIKE_NUM": True}, {"LOWER":  {"IN": ["inches", "-inche", "inche"]}}]
     time_span_pattern = [{"LIKE_NUM": True}, {"LOWER": "to"}, {"LIKE_NUM": True}, {"LOWER": "hours"}]
 
-    electic_current_pattern=[ {"IS_DIGIT": True}, {"LOWER": {"REGEX": "m?A$"}}]
+    electic_current_pattern = [{"IS_DIGIT": True}, {"LOWER": {"REGEX": "m?A$"}}]
 
     patterns = [
-        {"label": "Unit_Data_Storage", "pattern": storage_pattern},
-        {"label": "Dimensions", "pattern": dimension_pattern},
-        {"label": "Unit_Weights", "pattern": weights_pattern},
-        {"label": "Unit_Speed", "pattern": speed_pattern},
-        {"label": "Unit_WriteSpeed", "pattern": write_speed_pattern},
-        {"label": "Unit_Resolution", "pattern": inches_pattern},
-        {"label": "Unit_electic_current", "pattern": electic_current_pattern},
-        {"label": "Time_Span", "pattern": time_span_pattern}
+        {"label": "UNIT_DATA_STORAGE", "pattern": storage_pattern},
+        {"label": "DIMENSIONS", "pattern": dimension_pattern},
+        {"label": "UNIT_WEIGHTS", "pattern": weights_pattern},
+        {"label": "UNIT_SPEED", "pattern": speed_pattern},
+        {"label": "UNIT_WRITESPEED", "pattern": write_speed_pattern},
+        {"label": "UNIT_RESOLUTION", "pattern": inches_pattern},
+        {"label": "UNIT_ELECTIC_CURRENT", "pattern": electic_current_pattern},
+        {"label": "TIME_SPAN", "pattern": time_span_pattern},
+        {"label": "SIZE", "pattern": size_pattern}
     ]
 
 
