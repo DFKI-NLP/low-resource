@@ -18,6 +18,9 @@ from allennlp.training.metrics import CategoricalAccuracy, SpanBasedF1Measure, F
 from typing import Callable, List, Set, Tuple, TypeVar, Optional
 import warnings
 
+import torchvision.utils as vutils
+
+
 
 @Model.register("low_resource_crf_tagger_pu")
 class LowResourceCrfTaggerPU(Model):
@@ -125,9 +128,11 @@ class LowResourceCrfTaggerPU(Model):
 
         self.metrics = {
                 "accuracy": CategoricalAccuracy(),
-                "accuracy3": CategoricalAccuracy(top_k=3)
+                #"accuracy3": CategoricalAccuracy(top_k=3)
         }
         self.calculate_span_f1 = calculate_span_f1
+
+        self.prior = 0.05
 
         if not label_encoding:
             raise ConfigurationError("calculate_span_f1 is True, but "
@@ -150,6 +155,7 @@ class LowResourceCrfTaggerPU(Model):
         if feedforward is not None:
             check_dimensions_match(encoder.get_output_dim(), feedforward.get_input_dim(),
                                    "encoder output dim", "feedforward input dim")
+
         initializer(self)
 
     def binary_tags_to_spans(self, tag_sequence: List[str],
@@ -248,9 +254,30 @@ class LowResourceCrfTaggerPU(Model):
         output = {"logits": logits, "mask": mask, "tags": predicted_tags}
 
         if tags is not None:
+            logits_P = logits.masked_select((((mask - 1) + tags) == 1).unsqueeze(-1).expand(*tags.size(), 2))
+            logits_U = logits.masked_select((((mask - 1) + tags) == 0).unsqueeze(-1).expand(*tags.size(), 2)).view(-1,2).unsqueeze(0)
+
+            if len(logits_P) > 0:
+                logits_P = logits_P.view(-1,2).unsqueeze(0)
+                log_likelihood_p = self.crf(logits_P, torch.ones(logits_P.size()[1]).long().unsqueeze(0).cuda(),
+                                            torch.ones(logits_P.size()[1]).long().unsqueeze(0).cuda())
+            else:
+                log_likelihood_p = torch.FloatTensor([0]).cuda()
+
             # Add negative log-likelihood as loss
-            log_likelihood = self.crf(logits, tags, mask)
-            output["loss"] = -log_likelihood
+            log_likelihood_u = self.crf(logits_U, torch.zeros(logits_U.size()[1]).long().unsqueeze(0).cuda(), torch.ones(logits_U.size()[1]).long().unsqueeze(0).cuda())
+
+            pRisk = - log_likelihood_p
+            uRisk = - log_likelihood_u
+            nRisk = uRisk - self.prior * (1 - pRisk)
+            risk = (pRisk + nRisk).cuda()
+
+            output["loss"] = risk
+            output["pRisk"] = pRisk
+            output["uRisk"] = uRisk
+            output["nRisk"] = nRisk
+            output["loss_estimate"] = risk
+            output["loss_crf"] = -self.crf(logits, tags, mask)
 
             # Represent viterbi tags as "class probabilities" that we can
             # feed into the metrics
