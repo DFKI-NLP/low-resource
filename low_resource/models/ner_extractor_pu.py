@@ -33,8 +33,8 @@ class LowResourceNerExtractorPU(Model):
         self.positive = np.eye(2)[1]
         self.negative = np.eye(2)[0]
 
-        self.prior = 0.05
-        self.m = 1.0
+
+
 
         self.beta = 0.0
         self.gamma = 1.0
@@ -66,17 +66,6 @@ class LowResourceNerExtractorPU(Model):
                                          tags=tags,
                                          metadata=metadata)
 
-        # flags = torch.zeros(tags.size()).unsqueeze(-1).expand(*tags.size(), 2).scatter_(-1, tags.unsqueeze(-1), 1)
-        #
-        # postive = (flags == torch.from_numpy(self.positive).float()) * 1
-        # unlabeled = (flags == torch.from_numpy(self.negative).float()) * 1
-
-        # hP = ner_output_dict['logits'].masked_select((tags==1).unsqueeze(-1).expand(*tags.size(), 2)).view(-1,2)
-        # hU = ner_output_dict['logits'].masked_select((tags==0).unsqueeze(-1).expand(*tags.size(), 2)).view(-1,2)
-
-        # if nRisk < self.beta:
-        #     risk = (-self.gamma * nRisk).cpu()
-
         self.pRisk = ner_output_dict['pRisk']
         self.uRisk = ner_output_dict['uRisk']
         self.nRisk = ner_output_dict['nRisk']
@@ -106,3 +95,4 @@ class LowResourceNerExtractorPU(Model):
         metrics_dict["nRisk"] = self.nRisk
 
         return metrics_dict
+

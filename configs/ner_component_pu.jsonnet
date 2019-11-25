@@ -59,6 +59,9 @@
       "label_encoding": "BO",
       "calculate_span_f1": false,
       "dropout": 0.1,
+      "prior":0.05 ,
+      "gamma": 0.5,
+      "m": 0.9,
       "include_start_end_transitions": false,
       "encoder": {
         "type": "lstm",
@@ -90,7 +93,7 @@
     "grad_clipping": 5.0,
     "num_epochs": 1,
     "patience": 5,
-    "cuda_device": 1,
+    "cuda_device": [1],
     "histogram_interval": 10
   }
 }
