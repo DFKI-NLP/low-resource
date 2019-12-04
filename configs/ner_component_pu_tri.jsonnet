@@ -24,8 +24,8 @@
       }
     }
   },
-  "train_data_path": "/data2/zhanghc/RE/low-resource/src/data/distantly_labeled/train_appear.jsonl",
-  "validation_data_path": "/data2/zhanghc/RE/low-resource/src/data/distantly_labeled/dev_appear.jsonl",
+  "train_data_path": "/data2/zhanghc/RE/low-resource/src/data/distantly_labeled/train_appear_tri.jsonl",
+  "validation_data_path": "/data2/zhanghc/RE/low-resource/src/data/distantly_labeled/dev_appear_tri.jsonl",
   "evaluate_on_test": false,
   "model": {
     "type": "ner_extractor_pu",
@@ -54,15 +54,16 @@
       },
     },
     "ner_model": {
-      "type": "low_resource_crf_tagger_pu",
-      "constrain_crf_decoding": false,
-      "label_encoding": "BO",
+      "type": "low_resource_crf_tagger_pu_tri",
+      "constrain_crf_decoding": true,
+      "label_encoding": "BIO",
       "calculate_span_f1": false,
       "dropout": 0.1,
-      "prior":0.02 ,
+      "prior":0.03,
+      "prior_I": 0.01,
       "gamma": 0.8,
       "m": 0.9,
-      "include_start_end_transitions": false,
+      "include_start_end_transitions": true,
       "encoder": {
         "type": "lstm",
         "input_size": token_emb_dim + char_num_filters,
@@ -93,7 +94,7 @@
     "grad_clipping": 5.0,
     "num_epochs": 1,
     "patience": 5,
-    "cuda_device": [4],
+    "cuda_device": [7],
     "histogram_interval": 10
   }
 }

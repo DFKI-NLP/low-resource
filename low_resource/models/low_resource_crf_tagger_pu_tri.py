@@ -265,46 +265,25 @@ class LowResourceCrfTaggerPU3(Model):
         device = logits.get_device()
         logits_dim = logits.size()[-1]
         if tags is not None:
-            logits_P_B = logits.masked_select((((mask - 1) + tags) == 1).unsqueeze(-1).expand(*tags.size(), logits_dim))
-            logits_P_I = logits.masked_select((((mask - 1) + tags) == 2).unsqueeze(-1).expand(*tags.size(), logits_dim))
-            logits_U = logits.masked_select((((mask - 1) + tags) == 0).unsqueeze(-1).expand(*tags.size(), logits_dim)).view(-1,
-                                                                                                                   logits_dim)
-            if len(logits_P_B) > 0:
-                logits_P_B = logits_P_B.view(-1, logits_dim)
-                log_likelihood_p_b = self.entroyLoss(logits_P_B, torch.ones(logits_P_B.size()[0]).long().to(device))
-                log_likelihood_p_b_n = self.entroyLoss(logits_P_B, torch.zeros(logits_P_B.size()[0]).long().to(device))
-            else:
-                log_likelihood_p_b = torch.FloatTensor([0]).squeeze().to(device)
-                log_likelihood_p_b_n = torch.FloatTensor([0]).squeeze().to(device)
-
-            if len(logits_P_I) > 0:
-                logits_P_I = logits_P_I.view(-1, logits_dim)
-                log_likelihood_p_i = self.entroyLoss(logits_P_I, torch.ones(logits_P_I.size()[0]).long().to(device))
-                log_likelihood_p_i_n = self.entroyLoss(logits_P_I, torch.zeros(logits_P_I.size()[0]).long().to(device))
-            else:
-                log_likelihood_p_i = torch.FloatTensor([0]).squeeze().to(device)
-                log_likelihood_p_i_n = torch.FloatTensor([0]).squeeze().to(device)
 
             # Add negative log-likelihood as loss
-            log_likelihood_u = self.entroyLoss(logits_U, torch.zeros(logits_U.size()[0]).long().to(device))
+            pRisk = - self.crf(logits, tags, mask)
+            uRisk = - self.crf(logits, torch.zeros(tags.size()).long().to(device), mask)
+            nRisk = self.prior * uRisk
 
-            pRisk = log_likelihood_p_b*(logits_P_B.size()[0])+log_likelihood_p_i*(logits_P_I.size()[0])
-            uRisk = log_likelihood_u*(logits_U.size()[0])
-            nRisk = uRisk - self.prior * log_likelihood_p_b_n - self.prior_I * log_likelihood_p_i_n
-
-            risk = self.m * pRisk + nRisk
+            risk = self.m * pRisk - nRisk
 
             # if risk < self.beta:
             #     risk = -self.gamma * nRisk
-            if nRisk < self.beta:
-                risk = -self.gamma * nRisk
+            if risk < self.beta:
+                risk = self.gamma * nRisk
 
             output["loss"] = risk
             output["pRisk"] = pRisk
             output["uRisk"] = uRisk
             output["nRisk"] = nRisk
             output["loss_estimate"] = risk
-            output["loss_crf"] = -self.crf(logits, tags, mask)
+            output["loss_crf"] = pRisk
 
             # Represent viterbi tags as "class probabilities" that we can
             # feed into the metrics

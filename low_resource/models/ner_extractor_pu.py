@@ -30,15 +30,6 @@ class LowResourceNerExtractorPU(Model):
         self.text_field_embedder = text_field_embedder
         self.ner_model = ner_model
 
-        self.positive = np.eye(2)[1]
-        self.negative = np.eye(2)[0]
-
-
-
-
-        self.beta = 0.0
-        self.gamma = 1.0
-
         self.loss_crf = 0.0
         self.loss_estimate = 0.0
         self.pRisk = 0.0

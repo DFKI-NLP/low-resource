@@ -154,9 +154,18 @@ if __name__ == '__main__':
     # nlp = create_nlp_pipeline(gazetteers_path=GAZETTEERS_PATH)
     # instances = instances_from_amazon()
     # annotated_instances = create_annotated_single_dataset(instances, nlp, output_path="data/amazon_distant.json",ner_tag="COMPONENTS")
+
     isBinaryLabel = True
-    tag = "COMPONENT" if isBinaryLabel else 'B-COMPONENTS'
+
+    filePath="data/distantly_labeled/"
+    trainName = "train_appear"
+    devName = "dev_appear"
+
+
+    trainName = trainName if isBinaryLabel else trainName+"_tri"
+    devName = devName if isBinaryLabel else devName + "_tri"
+
     path_out = convert_to_jsonl_single_cls(path_in='data/amazon_distant.json', isBinaryLabel=isBinaryLabel)
     create_train_dev_split_arne(path_in=path_out,
-                                path_out_train="data/distantly_labeled/train_appear.jsonl",
-                                path_out_dev="data/distantly_labeled/dev_appear.jsonl")
+                                path_out_train=filePath+trainName+".jsonl",
+                                path_out_dev=filePath+devName+".jsonl", isBinaryLabel=isBinaryLabel)
