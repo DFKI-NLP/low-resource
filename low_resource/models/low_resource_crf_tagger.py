@@ -14,6 +14,8 @@ from allennlp.nn import InitializerApplicator, RegularizerApplicator
 import allennlp.nn.util as util
 from allennlp.training.metrics import CategoricalAccuracy, SpanBasedF1Measure
 
+from low_resource.metrics import F1Measure
+
 
 @Model.register("low_resource_crf_tagger")
 class LowResourceCrfTagger(Model):
@@ -130,6 +132,8 @@ class LowResourceCrfTagger(Model):
             self._f1_metric = SpanBasedF1Measure(vocab,
                                                  tag_namespace=label_namespace,
                                                  label_encoding=label_encoding)
+        else:
+            self._f1_metric = F1Measure(vocabulary=self.vocab)
 
         # check_dimensions_match(text_field_embedder.get_output_dim(), encoder.get_input_dim(),
         #                        "text field embedding dim", "encoder input dim")
@@ -197,7 +201,7 @@ class LowResourceCrfTagger(Model):
         # Just get the tags and ignore the score.
         predicted_tags = [x for x, y in best_paths]
 
-        output = {"logits": logits, "mask": mask, "tags": predicted_tags}
+        output = {"logits": logits, "mask": mask, "label_tags": tags,"tags":predicted_tags}
 
         if tags is not None:
             # Add negative log-likelihood as loss

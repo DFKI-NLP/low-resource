@@ -1,12 +1,10 @@
 import sys
 import os
 
-import sys;
-
-from low_resource.data.data_utils import to_iob1
-
 print('Python %s on %s' % (sys.version, sys.platform))
 sys.path.extend(['/data2/zhanghc/RE/low-resource'])
+
+from low_resource.data.data_utils import to_iob1_by_spacy
 
 from src.prepare.spilit_train_dev_appear import create_train_dev_split_arne
 
@@ -20,7 +18,8 @@ from tqdm import tqdm
 import numpy as np
 
 Instance = namedtuple("Instance", ["id", "text"])
-AnnotatedInstance = namedtuple("AnnotatedInstance", ["id", "docid", "token", "ner", "pos", "dep_head", "dep_rel"])
+AnnotatedInstance = namedtuple("AnnotatedInstance",
+                               ["id", "docid", "token", "ner", "pos", "dep_head", "dep_rel", "iob", "ent_num"])
 
 
 def parse(path):
@@ -54,7 +53,6 @@ def instances_from_wdc(path: str) -> List[Dict[str, Any]]:
             t = json.loads(line)
             examples.append(Instance(id=t["id"],
                                      text=t["text"]))
-
     return examples
 
 
@@ -71,6 +69,7 @@ def create_annotated_dataset(instances: List[Instance], nlp: Language, output_pa
                                                      token=[t.text for t in doc],
                                                      ner=[t.ent_type_ if t.ent_type_ else "O" for t in doc],
                                                      pos=[t.pos_ for t in doc],
+                                                     iob=[t.ent_iob_ for t in doc],
                                                      dep_head=[t.head.i for t in doc],
                                                      dep_rel=[t.dep_ for t in doc]))
 
@@ -99,7 +98,9 @@ def create_annotated_single_dataset(instances: List[Instance], nlp: Language, ou
                                                      token=[t.text for t in doc],
                                                      ner=[t.ent_type_ if (
                                                              t.ent_type_ and t.ent_type_ == ner_tag) else "O" for t
-                                                          in doc],  #
+                                                          in doc],
+                                                     iob=[t.ent_iob_ for t in doc],
+                                                     ent_num=len(doc.ents),
                                                      pos=[t.pos_ for t in doc],
                                                      dep_head=[t.head.i for t in doc],
                                                      dep_rel=[t.dep_ for t in doc]))
@@ -110,7 +111,7 @@ def create_annotated_single_dataset(instances: List[Instance], nlp: Language, ou
     return annotated_instances
 
 
-def to_binary_label(instance, tag_type):
+def to_binary_label(instance, tag_type, iob_tag=None):
     # encode all tags as "inside" (I-) tags
     for t_idx, t in enumerate(instance[tag_type]):
         if instance[tag_type][t_idx] != 'O':
@@ -135,13 +136,13 @@ def convert_to_jsonl_single_cls(path_in, path_out=None, min_tokens=6, force_recr
             return path_out
     n = 0
     n_discarded = 0
-    label_function = to_binary_label if isBinaryLabel else to_iob1
+    label_function = to_binary_label if isBinaryLabel else to_iob1_by_spacy
     with open(path_in) as f:
         data = json.load(f)
         with open(path_out, 'w') as out_f:
             for inst in tqdm(data):
                 if len(inst['token']) >= min_tokens:
-                    out_f.write(json.dumps(label_function(inst, tag_type='ner')) + '\n')
+                    out_f.write(json.dumps(label_function(inst, tag_type='ner', iob_tag="iob")) + '\n')
                     n += 1
                 else:
                     n_discarded += 1
@@ -150,22 +151,22 @@ def convert_to_jsonl_single_cls(path_in, path_out=None, min_tokens=6, force_recr
 
 
 if __name__ == '__main__':
-    # GAZETTEERS_PATH = "/data2/zhanghc/RE/low-resource/src/data/gazetteers/"
-    # nlp = create_nlp_pipeline(gazetteers_path=GAZETTEERS_PATH)
-    # instances = instances_from_amazon()
-    # annotated_instances = create_annotated_single_dataset(instances, nlp, output_path="data/amazon_distant.json",ner_tag="COMPONENTS")
+    GAZETTEERS_PATH = "/data2/zhanghc/RE/low-resource/src/data/gazetteers/"
+    nlp = create_nlp_pipeline(gazetteers_path=GAZETTEERS_PATH)
+    instances = instances_from_amazon()
+    annotated_instances = create_annotated_single_dataset(instances, nlp, output_path="data/amazon_distant.json",ner_tag="COMPONENTS")
 
-    isBinaryLabel = True
+    isBinaryLabel = False
 
-    filePath="data/distantly_labeled/"
+    filePath = "data/distantly_labeled/"
     trainName = "train_appear"
     devName = "dev_appear"
 
-
-    trainName = trainName if isBinaryLabel else trainName+"_tri"
+    trainName = trainName if isBinaryLabel else trainName + "_tri"
     devName = devName if isBinaryLabel else devName + "_tri"
 
     path_out = convert_to_jsonl_single_cls(path_in='data/amazon_distant.json', isBinaryLabel=isBinaryLabel)
     create_train_dev_split_arne(path_in=path_out,
-                                path_out_train=filePath+trainName+".jsonl",
-                                path_out_dev=filePath+devName+".jsonl", isBinaryLabel=isBinaryLabel)
+                                path_out_train=filePath + trainName + ".jsonl",
+                                path_out_dev=filePath + devName + ".jsonl", isBinaryLabel=isBinaryLabel)
+    print("path_out=", filePath + trainName + ".jsonl")

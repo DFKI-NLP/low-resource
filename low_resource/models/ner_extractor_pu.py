@@ -30,12 +30,6 @@ class LowResourceNerExtractorPU(Model):
         self.text_field_embedder = text_field_embedder
         self.ner_model = ner_model
 
-        self.loss_crf = 0.0
-        self.loss_estimate = 0.0
-        self.pRisk = 0.0
-        self.uRisk = 0.0
-        self.nRisk = 0.0
-
         initializer(self)
 
     def forward(self,  # type: ignore
@@ -57,11 +51,6 @@ class LowResourceNerExtractorPU(Model):
                                          tags=tags,
                                          metadata=metadata)
 
-        self.pRisk = ner_output_dict['pRisk']
-        self.uRisk = ner_output_dict['uRisk']
-        self.nRisk = ner_output_dict['nRisk']
-        self.loss_crf = ner_output_dict["loss_crf"]
-        self.loss_estimate = ner_output_dict["loss_estimate"]
         return ner_output_dict
 
 
@@ -79,11 +68,6 @@ class LowResourceNerExtractorPU(Model):
                     f"{model_name}-{metric_name}": metric
                     for metric_name, metric in model_metrics.items()
             })
-        metrics_dict["loss_crf"] = self.loss_crf
-        metrics_dict["loss_es"] = self.loss_estimate
-        metrics_dict["pRisk"] = self.pRisk
-        metrics_dict["uRisk"] = self.uRisk
-        metrics_dict["nRisk"] = self.nRisk
 
         return metrics_dict
 

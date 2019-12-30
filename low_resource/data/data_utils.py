@@ -21,9 +21,17 @@ def to_iob1(instance, tag_type):
             else:
                 instance[tag_type][t_idx] = 'I-' + t
         last_t = t
-    #for t_idx in range(len(instance['pos'])):
+    # for t_idx in range(len(instance['pos'])):
     #    if instance['pos'][t_idx] != 'O':
     #        instance['pos'][t_idx] = 'I-' + instance['pos'][t_idx]
+    return instance
+
+
+""" using spacy token atribute  t.ent_iob_   """
+
+
+def to_iob1_by_spacy(instance, tag_type, iob_tag):
+    instance[tag_type] = [iob + '-' + t if t != 'O' else t for t, iob in zip(instance[tag_type], instance[iob_tag])]
     return instance
 
 
@@ -33,7 +41,7 @@ def convert_json_to_jsonl_bio(path_in, path_out=None, min_tokens=6, force_recrea
     """
     print(f'convert to jsonl {path_in} ...')
     if path_out is None:
-        path_out = (path_in[:len(path_in)-5] + '_bio.jsonl') if path_in.endswith('.json') else path_in + '_bio.jsonl'
+        path_out = (path_in[:len(path_in) - 5] + '_bio.jsonl') if path_in.endswith('.json') else path_in + '_bio.jsonl'
     if os.path.exists(path_out):
         if force_recreate:
             print(f'WARNING: {path_out} already exists. File will be overwritten!')
@@ -68,5 +76,5 @@ def create_train_dev_split(path, train, dev, proportion_train=0.8):
 
 if __name__ == '__main__':
     path_out = convert_json_to_jsonl_bio('../../data/distantly_labeled/amazon_wdc_washer_distant.json')
-    #path_out = convert_json_to_jsonl('../../data/distantly_labeled/lenovo_distant.json')
+    # path_out = convert_json_to_jsonl('../../data/distantly_labeled/lenovo_distant.json')
     create_train_dev_split(path_out, '../../data/train_distant.jsonl', '../../data/dev_distant.jsonl')

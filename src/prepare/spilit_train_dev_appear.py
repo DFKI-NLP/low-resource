@@ -11,7 +11,7 @@ tags_list = [('microphone', 5279), ('Hard Drive', 5589), ('Processor', 6073), ('
              ('USB', 107291)]
 # I use these four tag to split the dataset.
 # If a document has one of the tag, it will be add to "dev". otherwise will be "training".
-tags_set = {'USB','Keyboard','Memory','RAM'}
+tags_set = {'USB','Keyboard','Memory','RAM','Hard','Adapter',"speaker",'Mouse'}
 
 
 def create_train_dev_split(path_in, path_out_train, path_out_dev):

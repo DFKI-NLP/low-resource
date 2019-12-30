@@ -28,7 +28,7 @@
   "validation_data_path": "/data2/zhanghc/RE/low-resource/src/data/distantly_labeled/dev_appear_tri.jsonl",
   "evaluate_on_test": false,
   "model": {
-    "type": "ner_extractor_pu",
+    "type": "low_resource_ner_extractor",
     "text_field_embedder": {
       "token_embedders": {
         "tokens": {
@@ -54,15 +54,11 @@
       },
     },
     "ner_model": {
-      "type": "low_resource_crf_tagger_pu_tri",
+      "type": "low_resource_crf_tagger",
       "constrain_crf_decoding": true,
       "label_encoding": "BIO",
       "calculate_span_f1": false,
       "dropout": 0.1,
-      "prior":0.03,
-      "prior_I": 0.01,
-      "gamma": 1,
-      "m": 0.9,
       "include_start_end_transitions": false,
       "encoder": {
         "type": "lstm",
@@ -94,7 +90,7 @@
     "grad_clipping": 5.0,
     "num_epochs": 1,
     "patience": 5,
-    "cuda_device": [0],
+    "cuda_device": [2],
     "histogram_interval": 10
   }
 }
