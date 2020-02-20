@@ -4,6 +4,7 @@
 
 {
   local data_dir = "/home/arne/data/datasets/ner/conll2003",
+  //local requires_grad = std.extVar("BERT_FINETUNE"),
 
   "dataset_reader": {
     "type": "conll2003",
@@ -36,7 +37,8 @@
         "token_embedders": {
             "tokens": {
                 "type": "bert-pretrained",
-                "pretrained_model": "bert-base-cased"
+                "pretrained_model": "bert-base-cased",
+                //"requires_grad": requires_grad,
             }
         }
     },
